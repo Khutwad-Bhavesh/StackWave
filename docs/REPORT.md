@@ -62,24 +62,22 @@ The project maps fundamental cloud computing and distributed systems principles 
 
 ### 1.3 System Architecture & Tech Stack
 
-```
- RFID tags (books, member cards)
-        │
- ┌──────▼───────────────┐   HTTPS + HMAC-SHA256 Signed JSON
- │ EDGE READERS         │──────────────┐
- │ checkout · gate ·    │              ▼
- │ shelf (simulator /   │      ┌────────────────┐
- │ ESP32+RC522)         │      │ Nginx (LB)     │◄── Dashboard (Static SPA)
- └──────────────────────┘      └───────┬────────┘
-                                       ▼
-                       ┌─────────────────────────────┐
-                       │ FastAPI containers (N)      │
-                       │ auth · ingest · circulation │
-                       │ tracking · alerts · stats   │
-                       └───────┬─────────────┬───────┘
-                               ▼             ▼
-                        PostgreSQL     /health · /metrics
-                      (managed DB)     structured logs
+```mermaid
+flowchart TD
+    TAGS["RFID tags (books, member cards)"]
+    READERS["EDGE READERS<br/>checkout · gate · shelf<br/>(simulator / ESP32+RC522)"]
+    NGINX["Nginx (LB)"]
+    DASH["Dashboard (Static SPA)"]
+    API["FastAPI containers (N)<br/>auth · ingest · circulation<br/>tracking · alerts · stats"]
+    DB[("PostgreSQL<br/>(managed DB)")]
+    TELEMETRY["/health · /metrics<br/>structured logs"]
+
+    TAGS --> READERS
+    READERS -->|"HTTPS + HMAC-SHA256 Signed JSON"| NGINX
+    DASH --> NGINX
+    NGINX --> API
+    API --> DB
+    API --> TELEMETRY
 ```
 
 - **Backend Microservices**: Python 3.11 / 3.14, FastAPI asynchronous framework, Uvicorn ASGI server, SQLAlchemy 2.0 ORM, Pydantic v2 schemas.
@@ -229,21 +227,51 @@ Covers web user experience design, Single-Page Application (SPA) architecture, c
 
 A production hardware path is provided in [`hardware/esp32_rfid_reader.ino`](file:///home/aizen-sosuke/.gemini/antigravity/scratch/rfid-library-system/hardware/esp32_rfid_reader.ino).
 
-```
-       ESP32 DevKit V1                          MFRC522 (RC522)
-   ┌──────────────────────┐                 ┌──────────────────────┐
-   │                 3V3  │─────────────────│  VCC (3.3V ONLY)     │
-   │                 GND  │─────────────────│  GND                 │
-   │           GPIO 22    │─────────────────│  RST (Reset)         │
-   │           GPIO 5     │─────────────────│  SDA / SS (Slave Sel)│
-   │           GPIO 18    │─────────────────│  SCK (SPI Clock)     │
-   │           GPIO 19    │─────────────────│  MISO                │
-   │           GPIO 23    │─────────────────│  MOSI                │
-   │                      │                 └──────────────────────┘
-   │           GPIO 2     │──[ 220Ω ]──> [Green LED (Success)]
-   │           GPIO 4     │──[ 220Ω ]──> [Red LED (Alarm)]
-   │           GPIO 15    │────────────> [Piezo Buzzer (+)]
-   └──────────────────────┘
+```mermaid
+flowchart LR
+    subgraph ESP32["ESP32 DevKit V1"]
+        direction TB
+        E_3V3["3V3 (Power Out)"]
+        E_GND["GND (Ground)"]
+        E_22["GPIO 22 (RST)"]
+        E_5["GPIO 5 (SDA / SS)"]
+        E_18["GPIO 18 (SCK)"]
+        E_19["GPIO 19 (MISO)"]
+        E_23["GPIO 23 (MOSI)"]
+        E_2["GPIO 2 (Status OK)"]
+        E_4["GPIO 4 (Alarm LED)"]
+        E_15["GPIO 15 (Buzzer)"]
+    end
+
+    subgraph RC522["MFRC522 (RC522 RFID)"]
+        direction TB
+        R_VCC["VCC (3.3V ONLY)"]
+        R_GND["GND (Ground)"]
+        R_RST["RST (Reset)"]
+        R_SDA["SDA / SS (Slave Select)"]
+        R_SCK["SCK (SPI Clock)"]
+        R_MISO["MISO (Master In)"]
+        R_MOSI["MOSI (Master Out)"]
+    end
+
+    subgraph PERIPHERALS["Peripherals & Indicators"]
+        direction TB
+        LED_G["Green LED (Success)"]
+        LED_R["Red LED (Alarm)"]
+        BUZZ["Piezo Buzzer (+)"]
+    end
+
+    E_3V3 <====>|"3.3V Power"| R_VCC
+    E_GND <---->|"Common Ground"| R_GND
+    E_22 <---->|"Reset Line"| R_RST
+    E_5 <---->|"SPI Chip Select"| R_SDA
+    E_18 <---->|"SPI Clock"| R_SCK
+    E_19 <---->|"SPI Data In"| R_MISO
+    E_23 <---->|"SPI Data Out"| R_MOSI
+
+    E_2 -->|"220 Ω Resistor"| LED_G
+    E_4 -->|"220 Ω Resistor"| LED_R
+    E_15 -->|"Direct Drive"| BUZZ
 ```
 
 ### Firmware Execution Sequence

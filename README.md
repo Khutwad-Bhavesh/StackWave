@@ -6,24 +6,22 @@
 
 ## Architecture Diagram
 
-```
- RFID tags (books, member cards)
-        │
- ┌──────▼───────────────┐   HTTPS + HMAC-signed JSON
- │ EDGE READERS         │──────────────┐
- │ checkout · gate ·    │              ▼
- │ shelf (simulator /   │      ┌────────────────┐
- │ ESP32+RC522)         │      │ Nginx (LB)     │◄── Dashboard (static SPA)
- └──────────────────────┘      └───────┬────────┘
-                                       ▼
-                       ┌─────────────────────────────┐
-                       │ FastAPI containers (N)      │
-                       │ auth · ingest · circulation │
-                       │ tracking · alerts · stats   │
-                       └───────┬─────────────┬───────┘
-                               ▼             ▼
-                        PostgreSQL     /health · /metrics
-                      (managed DB)     structured logs
+```mermaid
+flowchart TD
+    TAGS["RFID tags (books, member cards)"]
+    READERS["EDGE READERS<br/>checkout · gate · shelf<br/>(simulator / ESP32+RC522)"]
+    NGINX["Nginx (LB)"]
+    DASH["Dashboard (Static SPA)"]
+    API["FastAPI containers (N)<br/>auth · ingest · circulation<br/>tracking · alerts · stats"]
+    DB[("PostgreSQL<br/>(managed DB)")]
+    TELEMETRY["/health · /metrics<br/>structured logs"]
+
+    TAGS --> READERS
+    READERS -->|"HTTPS + HMAC-SHA256 Signed JSON"| NGINX
+    DASH --> NGINX
+    NGINX --> API
+    API --> DB
+    API --> TELEMETRY
 ```
 
 ---
