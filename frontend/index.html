@@ -1,192 +1,376 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StackWave · Cloud-Native RFID Library System</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StackWave · Autonomous RFID Library System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Nexus Studio Typography: Clash Display, Cabinet Grotesk, JetBrains Mono -->
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <!-- Header Bar -->
-  <header class="app-header">
-    <div class="header-left">
-      <div class="logo-badge">
-        <svg class="rfid-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 10a8 8 0 0 1 16 0M7 13a4 4 0 0 1 10 0M12 16a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-        </svg>
-      </div>
-      <div>
-        <h1>StackWave</h1>
-        <p class="subtitle">Cloud-Native RFID Library System · 12-Factor Edge Ingestion</p>
+<body class="bg-ink-950 text-mist-100 font-body selection:bg-signal selection:text-ink-950">
+
+  <!-- Interactive Custom Cursor (Nexus Studio signature) -->
+  <div id="custom-cursor-dot" class="cursor-dot"></div>
+  <div id="custom-cursor-ring" class="cursor-ring"></div>
+
+  <!-- Noise Grain Background Overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Top Global Critical Theft Alarm (Active upon breach) -->
+  <aside id="theft-alarm-banner" class="alarm-strip hidden" role="alert">
+    <div class="alarm-strip-content">
+      <span class="alarm-pulsing-badge">BREACH DETECTED</span>
+      <div class="alarm-info">
+        <span class="alarm-title">PERIMETER SECURITY BREACH AT EXIT GATE</span>
+        <span id="alarm-message" class="alarm-desc">Unchecked asset passed through portal</span>
       </div>
     </div>
-    <div class="header-right">
-      <div class="badge-group">
-        <span class="status-pill online"><span class="dot pulse"></span> Cloud API: <span id="api-status">Online</span></span>
-        <span class="status-pill db"><span class="dot"></span> DB: <span id="db-status">Connected</span></span>
+    <button id="btn-resolve-top-alarm" class="btn-alarm-clear" data-cursor="hover">
+      Acknowledge & Clear Alarm
+    </button>
+  </aside>
+
+  <!-- Sticky Glassmorphic Header / Navbar -->
+  <header class="app-header">
+    <div class="header-container">
+      
+      <!-- Brand Logo -->
+      <div class="brand-group" data-cursor="hover">
+        <div class="logo-mark">
+          <svg class="logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M4 10a8 8 0 0 1 16 0M7 13a4 4 0 0 1 10 0M12 16a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <span class="brand-name">STACKWAVE</span>
+            <span class="live-dot" title="Edge Core Online"></span>
+          </div>
+          <span class="brand-subtitle">RFID CLOUD OS · V1.0</span>
+        </div>
       </div>
-      <div class="auth-pill">
-        <span class="user-role-badge" id="current-user-role">admin</span>
-        <span class="user-name" id="current-user-name">Eleanor (Staff)</span>
+
+      <!-- Center Status Telemetry -->
+      <div class="telemetry-pill-group">
+        <div class="telemetry-chip">
+          <span class="chip-label">ENGINE</span>
+          <span class="chip-val status-green" id="api-status">ONLINE</span>
+        </div>
+        <div class="telemetry-chip">
+          <span class="chip-label">DB</span>
+          <span class="chip-val status-blue" id="db-status">CONNECTED</span>
+        </div>
+        <div class="telemetry-chip hidden-sm">
+          <span class="chip-label">REPLAY GUARD</span>
+          <span class="chip-val">60S NONCE</span>
+        </div>
+      </div>
+
+      <!-- User Role & Action -->
+      <div class="header-actions">
+        <div class="user-pill" data-cursor="hover">
+          <span class="user-role-tag" id="current-user-role">STAFF</span>
+          <span class="user-name" id="current-user-name">Eleanor V.</span>
+        </div>
+        <a href="/docs" target="_blank" class="btn-nav-outline" data-cursor="hover">
+          API Specs ↗
+        </a>
       </div>
     </div>
   </header>
 
-  <!-- Top Global Security Alert Banner (hidden unless active theft alarm) -->
-  <div id="theft-alarm-banner" class="alert-banner hidden">
-    <div class="alert-content">
-      <span class="alarm-icon">🚨</span>
-      <div class="alarm-text">
-        <strong>CRITICAL THEFT ALARM AT EXIT GATE!</strong>
-        <span id="alarm-message">Unchecked book detected passing exit gate!</span>
-      </div>
+  <!-- Animated Marquee Ticker (Nexus Studio Style) -->
+  <div class="marquee-strip">
+    <div class="marquee-track">
+      <span>AUTONOMOUS RFID CIRCULATION</span>
+      <span class="ticker-dot">•</span>
+      <span>HMAC-SHA256 SIGNED INGESTION</span>
+      <span class="ticker-dot">•</span>
+      <span>2.0S HARDWARE DEBOUNCE FILTER</span>
+      <span class="ticker-dot">•</span>
+      <span>12-FACTOR STATELESS CLOUD REPLICAS</span>
+      <span class="ticker-dot">•</span>
+      <span>ANTI-THEFT EXIT GATE PERIMETER DEFENSE</span>
+      <span class="ticker-dot">•</span>
+      <span>POSTGRESQL 16 ACID PERSISTENCE</span>
+      <span class="ticker-dot">•</span>
+      <span>PROMETHEUS TELEMETRY EXPOSITION</span>
+      <span class="ticker-dot">•</span>
+      <span>ESP32 + MFRC522 RC522 EDGE FIRMWARE</span>
+      <span class="ticker-dot">•</span>
+      <!-- Repeated for seamless loop -->
+      <span>AUTONOMOUS RFID CIRCULATION</span>
+      <span class="ticker-dot">•</span>
+      <span>HMAC-SHA256 SIGNED INGESTION</span>
+      <span class="ticker-dot">•</span>
+      <span>2.0S HARDWARE DEBOUNCE FILTER</span>
+      <span class="ticker-dot">•</span>
+      <span>12-FACTOR STATELESS CLOUD REPLICAS</span>
+      <span class="ticker-dot">•</span>
+      <span>ANTI-THEFT EXIT GATE PERIMETER DEFENSE</span>
     </div>
-    <button id="btn-resolve-top-alarm" class="btn-resolve">Acknowledge & Clear Alarm</button>
   </div>
 
-  <main class="dashboard-container">
-    <!-- KPI Summary Row -->
-    <section class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-title">Total Cataloged</div>
-        <div class="kpi-value" id="kpi-total-books">-</div>
-        <div class="kpi-sub" id="kpi-total-copies">- physical copies</div>
+  <main class="main-wrapper">
+    <!-- Hero / Headline Row -->
+    <section class="hero-section">
+      <div class="hero-left">
+        <p class="section-label">// INTELLIGENT PHYSICAL ASSET INFRASTRUCTURE</p>
+        <h2 class="hero-headline">
+          Books in motion.<br/>
+          <span class="text-signal">Secured at the edge.</span>
+        </h2>
       </div>
-      <div class="kpi-card highlight-blue">
-        <div class="kpi-title">Checked Out</div>
-        <div class="kpi-value" id="kpi-checked-out">-</div>
-        <div class="kpi-sub" id="kpi-active-loans">- active loans</div>
-      </div>
-      <div class="kpi-card highlight-orange">
-        <div class="kpi-title">Overdue Items</div>
-        <div class="kpi-value" id="kpi-overdue">-</div>
-        <div class="kpi-sub">Blocked patrons</div>
-      </div>
-      <div class="kpi-card highlight-green">
-        <div class="kpi-title">Edge Scans Today</div>
-        <div class="kpi-value" id="kpi-scans-today">-</div>
-        <div class="kpi-sub">Debounced & signed</div>
-      </div>
-      <div class="kpi-card highlight-red" id="kpi-alerts-card">
-        <div class="kpi-title">Security Alarms</div>
-        <div class="kpi-value" id="kpi-active-alerts">0</div>
-        <div class="kpi-sub" id="kpi-alerts-sub">Unresolved breaches</div>
+      <div class="hero-right">
+        <p class="hero-desc">
+          Automated self-checkout, continuous shelf localization, and millisecond anti-theft gate interrogation powered by stateless microservices and hardware-accelerated HMAC verification.
+        </p>
       </div>
     </section>
 
-    <!-- Main Workspace Split: Virtual Reader Panel (Left) + Tabs (Right) -->
-    <div class="workspace-grid">
-      <!-- LEFT COLUMN: Virtual RFID Reader & Security Simulator -->
-      <aside class="panel virtual-reader-panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="4" width="20" height="16" rx="2"/>
-              <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h8M6 16h12"/>
-            </svg>
-            <h2>Virtual RFID Edge Scanner</h2>
+    <!-- Bento Grid KPI Stats (Nexus Studio Aesthetic) -->
+    <section class="kpi-bento-grid">
+      <!-- Card 1: Catalog -->
+      <div class="bento-card group" data-cursor="hover">
+        <div class="card-glow"></div>
+        <div class="bento-header">
+          <span class="card-index">01 / ASSETS</span>
+          <span class="card-tag">CATALOG</span>
+        </div>
+        <div class="bento-main">
+          <div class="bento-value" id="kpi-total-books">-</div>
+          <div class="bento-title">Unique Titles Registered</div>
+        </div>
+        <div class="bento-footer">
+          <span id="kpi-total-copies" class="text-mist-700 font-mono text-xs">- physical copies tracked</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Circulation -->
+      <div class="bento-card group" data-cursor="hover">
+        <div class="card-glow"></div>
+        <div class="bento-header">
+          <span class="card-index">02 / CIRCULATION</span>
+          <span class="card-tag tag-signal">BORROWED</span>
+        </div>
+        <div class="bento-main">
+          <div class="bento-value text-signal" id="kpi-checked-out">-</div>
+          <div class="bento-title">Active Member Loans</div>
+        </div>
+        <div class="bento-footer">
+          <span id="kpi-active-loans" class="text-mist-700 font-mono text-xs">- on active borrow</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Overdue -->
+      <div class="bento-card group" data-cursor="hover">
+        <div class="card-glow"></div>
+        <div class="bento-header">
+          <span class="card-index">03 / COMPLIANCE</span>
+          <span class="card-tag tag-ember">RESTRICTED</span>
+        </div>
+        <div class="bento-main">
+          <div class="bento-value text-ember" id="kpi-overdue">-</div>
+          <div class="bento-title">Overdue Borrowers</div>
+        </div>
+        <div class="bento-footer">
+          <span class="text-mist-700 font-mono text-xs">Self-checkout blocked</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Daily Ingest -->
+      <div class="bento-card group" data-cursor="hover">
+        <div class="card-glow"></div>
+        <div class="bento-header">
+          <span class="card-index">04 / TELEMETRY</span>
+          <span class="card-tag">THROUGHPUT</span>
+        </div>
+        <div class="bento-main">
+          <div class="bento-value" id="kpi-scans-today">-</div>
+          <div class="bento-title">Edge Scans Today</div>
+        </div>
+        <div class="bento-footer">
+          <span class="text-mist-700 font-mono text-xs">2.0s Debounced & Verified</span>
+        </div>
+      </div>
+
+      <!-- Card 5: Security Alerts -->
+      <div class="bento-card group" id="kpi-alerts-card" data-cursor="hover">
+        <div class="card-glow"></div>
+        <div class="bento-header">
+          <span class="card-index">05 / INCIDENTS</span>
+          <span class="card-tag tag-alert" id="kpi-alerts-tag">CLEAN</span>
+        </div>
+        <div class="bento-main">
+          <div class="bento-value text-mist-100" id="kpi-active-alerts">0</div>
+          <div class="bento-title">Active Security Alarms</div>
+        </div>
+        <div class="bento-footer">
+          <span id="kpi-alerts-sub" class="text-mist-700 font-mono text-xs">All gates clear</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Operational Split: Cyber Console (Left) + Operations Tabs (Right) -->
+    <div class="workspace-layout">
+
+      <!-- LEFT: High-Tech Virtual RFID Terminal Console -->
+      <aside class="console-panel">
+        <div class="console-header">
+          <div class="console-title-box">
+            <span class="console-indicator"></span>
+            <h3 class="console-title">Edge Reader Terminal</h3>
           </div>
-          <span class="edge-crypto-tag">HMAC-SHA256 Signed</span>
+          <span class="badge-crypto">HMAC-SHA256</span>
         </div>
 
-        <p class="panel-desc">
-          Simulates an edge ESP32/RC522 reader. Computes genuine HMAC signatures, nonces, and timestamps in real time.
-        </p>
+        <div class="console-body">
+          <p class="console-desc">
+            Simulates physical hardware readers. Signs payloads with device-specific pre-shared keys and random nonces.
+          </p>
 
-        <!-- Reader Selection -->
-        <div class="form-group">
-          <label for="reader-select">Active Reader Terminal:</label>
-          <select id="reader-select" class="form-control">
-            <option value="CHECKOUT-01" data-key="checkout-secret-key-9988" data-type="CHECKOUT">CHECKOUT-01 · Self-Checkout Kiosk 1</option>
-            <option value="RETURN-01" data-key="return-secret-key-4455" data-type="RETURN">RETURN-01 · Smart Return Drop Chute</option>
-            <option value="SHELF-CS-01" data-key="shelf-secret-key-1122" data-type="SHELF">SHELF-CS-01 · Shelf Antenna (CS Stacks)</option>
-            <option value="GATE-01" data-key="gate-secret-key-7766" data-type="EXIT_GATE">GATE-01 · Anti-Theft Exit Gate</option>
-          </select>
-        </div>
-
-        <!-- Quick Demo Action Buttons -->
-        <div class="demo-buttons-section">
-          <label class="section-label">One-Click Demonstration Scenarios:</label>
-          <div class="demo-button-grid">
-            <button class="btn-demo" onclick="app.simulateScan('CARD-ALICE-001', 'CHECKOUT-01')">
-              <span class="icon">💳</span> Tap Alice's Card <span class="tag-meta">(Start Session)</span>
-            </button>
-            <button class="btn-demo" onclick="app.simulateScan('TAG-BK-CLEAN-02', 'CHECKOUT-01')">
-              <span class="icon">📖</span> Tap "Clean Code" Book <span class="tag-meta">(Checkout)</span>
-            </button>
-            <button class="btn-demo" onclick="app.simulateScan('TAG-BK-DDIA-01', 'CHECKOUT-01')">
-              <span class="icon">📖</span> Tap "DDIA" Book <span class="tag-meta">(Checkout)</span>
-            </button>
-            <button class="btn-demo warning" onclick="app.simulateScan('CARD-BOB-002', 'CHECKOUT-01')">
-              <span class="icon">🚫</span> Tap Bob's Card <span class="tag-meta">(Blocked: Overdue)</span>
-            </button>
-            <button class="btn-demo info" onclick="app.simulateScan('TAG-BK-CLEAN-01', 'RETURN-01')">
-              <span class="icon">📥</span> Drop Book in Return Chute <span class="tag-meta">(Return)</span>
-            </button>
-            <button class="btn-demo info" onclick="app.simulateScan('TAG-BK-PRAG-01', 'SHELF-CS-01')">
-              <span class="icon">🏷️</span> Shelf Inventory Sweep <span class="tag-meta">(Locate)</span>
-            </button>
-            <button class="btn-demo danger" onclick="app.simulateScan('TAG-BK-NET-01', 'GATE-01')">
-              <span class="icon">🚨</span> Pass Unchecked Book at Gate <span class="tag-meta">(Theft Alarm)</span>
-            </button>
-            <button class="btn-demo secondary" onclick="app.triggerDebounceTest()">
-              <span class="icon">⚡</span> Rapid Double-Tap <span class="tag-meta">(Test 2s Debounce)</span>
-            </button>
-            <button class="btn-demo secondary" onclick="app.triggerReplayAttackTest()">
-              <span class="icon">🛡️</span> Replay Attack Injection <span class="tag-meta">(Test Nonce Guard)</span>
-            </button>
+          <!-- Select Reader Device -->
+          <div class="field-block">
+            <label class="field-label">TARGET READER HARDWARE</label>
+            <div class="select-wrapper">
+              <select id="reader-select" class="select-cyber" data-cursor="hover">
+                <option value="CHECKOUT-01" data-key="checkout-secret-key-9988" data-type="CHECKOUT">CHECKOUT-01 · Self-Checkout Kiosk 1</option>
+                <option value="RETURN-01" data-key="return-secret-key-4455" data-type="RETURN">RETURN-01 · Smart Return Drop Chute</option>
+                <option value="SHELF-CS-01" data-key="shelf-secret-key-1122" data-type="SHELF">SHELF-CS-01 · Shelf Antenna (CS Stacks)</option>
+                <option value="GATE-01" data-key="gate-secret-key-7766" data-type="EXIT_GATE">GATE-01 · Anti-Theft Exit Gate</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Custom Manual Scan Input -->
-        <div class="manual-scan-box">
-          <label class="section-label">Manual Tag UID Input:</label>
-          <div class="input-with-button">
-            <input type="text" id="custom-tag-input" placeholder="e.g. TAG-BK-CLOUD-01 or CARD-001" class="form-control">
-            <button class="btn-primary" onclick="app.triggerCustomScan()">Emit Scan</button>
-          </div>
-        </div>
+          <!-- Quick Action Buttons -->
+          <div class="action-presets-block">
+            <label class="field-label">DEMO ATTACK & WORKFLOW SCENARIOS</label>
+            <div class="preset-btn-stack">
+              <button class="btn-scenario btn-sig-accent" onclick="app.simulateScan('CARD-ALICE-001', 'CHECKOUT-01')" data-cursor="hover">
+                <span class="btn-icon">💳</span>
+                <span class="btn-text">
+                  <strong>Tap Alice's Card</strong>
+                  <small>Initiates member checkout session</small>
+                </span>
+                <span class="btn-action-code">01</span>
+              </button>
 
-        <!-- Real-Time Crypto Inspector -->
-        <div class="crypto-inspector">
-          <div class="inspector-header">
-            <span>Edge Payload & Security Handshake</span>
-            <span class="sig-status valid" id="sig-indicator">HMAC Verified</span>
+              <button class="btn-scenario" onclick="app.simulateScan('TAG-BK-CLEAN-02', 'CHECKOUT-01')" data-cursor="hover">
+                <span class="btn-icon">📖</span>
+                <span class="btn-text">
+                  <strong>Tap "Clean Code" Book</strong>
+                  <small>Executes checkout on active session</small>
+                </span>
+                <span class="btn-action-code">02</span>
+              </button>
+
+              <button class="btn-scenario btn-warning-accent" onclick="app.simulateScan('CARD-BOB-002', 'CHECKOUT-01')" data-cursor="hover">
+                <span class="btn-icon">🚫</span>
+                <span class="btn-text">
+                  <strong>Tap Bob's Card (Overdue)</strong>
+                  <small>FR4: Triggers checkout block</small>
+                </span>
+                <span class="btn-action-code">03</span>
+              </button>
+
+              <button class="btn-scenario" onclick="app.simulateScan('TAG-BK-CLEAN-01', 'RETURN-01')" data-cursor="hover">
+                <span class="btn-icon">📥</span>
+                <span class="btn-text">
+                  <strong>Return Chute Drop</strong>
+                  <small>FR5: Calculates late fine & resets state</small>
+                </span>
+                <span class="btn-action-code">04</span>
+              </button>
+
+              <button class="btn-scenario" onclick="app.simulateScan('TAG-BK-PRAG-01', 'SHELF-CS-01')" data-cursor="hover">
+                <span class="btn-icon">🏷️</span>
+                <span class="btn-text">
+                  <strong>Shelf Inventory Sweep</strong>
+                  <small>FR7: Updates real-time location</small>
+                </span>
+                <span class="btn-action-code">05</span>
+              </button>
+
+              <button class="btn-scenario btn-danger-accent" onclick="app.simulateScan('TAG-BK-NET-01', 'GATE-01')" data-cursor="hover">
+                <span class="btn-icon">🚨</span>
+                <span class="btn-text">
+                  <strong>Breach Exit Gate with Book</strong>
+                  <small>FR8: Triggers CRITICAL theft siren</small>
+                </span>
+                <span class="btn-action-code">06</span>
+              </button>
+
+              <button class="btn-scenario btn-subtle" onclick="app.triggerDebounceTest()" data-cursor="hover">
+                <span class="btn-icon">⚡</span>
+                <span class="btn-text">
+                  <strong>Rapid Burst Double-Tap</strong>
+                  <small>Tests 2.0s hardware debounce</small>
+                </span>
+                <span class="btn-action-code">07</span>
+              </button>
+
+              <button class="btn-scenario btn-subtle" onclick="app.triggerReplayAttackTest()" data-cursor="hover">
+                <span class="btn-icon">🛡️</span>
+                <span class="btn-text">
+                  <strong>Replay Attack Injection</strong>
+                  <small>Tests nonce collision rejection</small>
+                </span>
+                <span class="btn-action-code">08</span>
+              </button>
+            </div>
           </div>
-          <pre id="payload-inspector-code">Ready for reader scan event...</pre>
+
+          <!-- Custom UID Input -->
+          <div class="field-block">
+            <label class="field-label">CUSTOM TAG UID EMITTER</label>
+            <div class="custom-input-bar">
+              <input type="text" id="custom-tag-input" placeholder="e.g. TAG-BK-CLOUD-01" class="input-cyber" />
+              <button class="btn-emit" onclick="app.triggerCustomScan()" data-cursor="hover">Scan</button>
+            </div>
+          </div>
+
+          <!-- Real-Time Cryptographic Inspector -->
+          <div class="crypto-card">
+            <div class="crypto-header">
+              <span class="crypto-title">// CRYPTO HANDSHAKE INSPECTOR</span>
+              <span id="sig-indicator" class="crypto-badge badge-valid">HMAC VERIFIED</span>
+            </div>
+            <pre id="payload-inspector-code" class="crypto-code">// Awaiting scan trigger...</pre>
+          </div>
         </div>
       </aside>
 
-      <!-- RIGHT COLUMN: Multi-tab Operations Workspace -->
-      <section class="panel main-workspace-panel">
-        <!-- Tab Navigation -->
-        <nav class="tab-nav">
-          <button class="tab-btn active" data-tab="live-feed">
-            <span class="tab-dot"></span> Live Ingest Feed
+      <!-- RIGHT: Multi-Tab Operations Workspace -->
+      <section class="operations-panel">
+        <!-- Tab Navigation Bar -->
+        <nav class="nav-tabs-bar">
+          <button class="tab-link active" data-tab="live-feed" data-cursor="hover">
+            <span class="tab-indicator-dot"></span> Live Ingest Feed
           </button>
-          <button class="tab-btn" data-tab="circulation">
+          <button class="tab-link" data-tab="circulation" data-cursor="hover">
             Active Loans & Overdue (<span id="loans-tab-count">0</span>)
           </button>
-          <button class="tab-btn" data-tab="tracking">
-            Real-Time Shelf Tracking
+          <button class="tab-link" data-tab="tracking" data-cursor="hover">
+            Shelf Tracking
           </button>
-          <button class="tab-btn" data-tab="alerts">
-            Security Alerts (<span id="alerts-tab-count">0</span>)
+          <button class="tab-link" data-tab="alerts" data-cursor="hover">
+            Perimeter Alerts (<span id="alerts-tab-count">0</span>)
           </button>
-          <button class="tab-btn" data-tab="fleet">
-            Reader Fleet & Cloud Health
+          <button class="tab-link" data-tab="fleet" data-cursor="hover">
+            Reader Fleet
           </button>
         </nav>
 
-        <!-- Tab 1: Live Event Stream -->
-        <div class="tab-content active" id="tab-live-feed">
-          <div class="tab-actions">
-            <div class="filter-group">
-              <label>Filter Reader:</label>
-              <select id="event-reader-filter" class="form-select-sm" onchange="app.renderEvents()">
+        <!-- Tab 1: Live Ingest Feed -->
+        <div class="tab-panel active" id="tab-live-feed">
+          <div class="panel-toolbar">
+            <div class="toolbar-left">
+              <label class="field-label inline-label">FILTER TERMINAL:</label>
+              <select id="event-reader-filter" class="select-cyber-sm" onchange="app.renderEvents()" data-cursor="hover">
                 <option value="">All Readers</option>
                 <option value="CHECKOUT-01">CHECKOUT-01</option>
                 <option value="RETURN-01">RETURN-01</option>
@@ -194,136 +378,153 @@
                 <option value="GATE-01">GATE-01</option>
               </select>
             </div>
-            <div class="feed-live-indicator">
-              <span class="dot green-pulse"></span> Streaming real-time RFID reads
+            <div class="live-streaming-indicator">
+              <span class="live-dot-pulse"></span>
+              <span class="font-mono text-xs text-signal">LIVE EDGE STREAM</span>
             </div>
           </div>
-          <div class="table-responsive">
-            <table class="data-table">
+
+          <div class="cyber-table-container">
+            <table class="cyber-table">
               <thead>
                 <tr>
-                  <th>Time</th>
+                  <th>Timestamp</th>
                   <th>Reader ID</th>
                   <th>Tag UID</th>
-                  <th>Classification</th>
-                  <th>Result / Action</th>
-                  <th>HMAC Security</th>
+                  <th>Entity</th>
+                  <th>Action / Classification</th>
+                  <th>HMAC Integrity</th>
                 </tr>
               </thead>
               <tbody id="events-table-body">
-                <tr><td colspan="6" class="text-center">Loading scan events...</td></tr>
+                <tr><td colspan="6" class="text-center py-8 text-mist-900">Connecting to telemetry feed...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
         <!-- Tab 2: Circulation & Loans -->
-        <div class="tab-content" id="tab-circulation">
-          <div class="tab-actions">
-            <h3>Active Member Loans & Returns</h3>
-            <span class="rule-hint">FR4 & FR6: Max 5 books · 14-day loan · Max 1 renewal · Blocked if overdue</span>
+        <div class="tab-panel" id="tab-circulation">
+          <div class="panel-toolbar">
+            <div>
+              <h3 class="panel-title">Active Member Loans</h3>
+              <p class="panel-subtitle">FR4 & FR6 · Max 5 books · 14-day tenure · Max 1 renewal · Overdue blocked</p>
+            </div>
           </div>
-          <div class="table-responsive">
-            <table class="data-table">
+
+          <div class="cyber-table-container">
+            <table class="cyber-table">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Loan ID</th>
                   <th>Book Title</th>
                   <th>Tag UID</th>
                   <th>Borrower</th>
-                  <th>Checked Out</th>
+                  <th>Issue Date</th>
                   <th>Due Date</th>
                   <th>Status</th>
                   <th>Renewals</th>
-                  <th>Actions</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="loans-table-body">
-                <tr><td colspan="9" class="text-center">Loading loans...</td></tr>
+                <tr><td colspan="9" class="text-center py-8 text-mist-900">Loading loan records...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Tab 3: Shelf Tracking & Inventory -->
-        <div class="tab-content" id="tab-tracking">
-          <div class="tab-actions">
-            <h3>Physical RFID Inventory & Last-Seen Locations</h3>
-            <span class="rule-hint">FR7: Updated via RFID shelf antenna sweeps & gate scans</span>
+        <!-- Tab 3: Shelf Tracking -->
+        <div class="tab-panel" id="tab-tracking">
+          <div class="panel-toolbar">
+            <div>
+              <h3 class="panel-title">Physical RFID Inventory Map</h3>
+              <p class="panel-subtitle">FR7 · Real-time shelf aisle localization updated via antenna interrogation sweeps</p>
+            </div>
           </div>
-          <div class="table-responsive">
-            <table class="data-table">
+
+          <div class="cyber-table-container">
+            <table class="cyber-table">
               <thead>
                 <tr>
                   <th>Book Title</th>
                   <th>RFID Tag UID</th>
-                  <th>Status</th>
-                  <th>Current Shelf / Location</th>
-                  <th>Last Seen Reader</th>
-                  <th>Last Seen Timestamp</th>
-                  <th>Borrower</th>
+                  <th>Current State</th>
+                  <th>Current Physical Location</th>
+                  <th>Last Interrogating Terminal</th>
+                  <th>Last Seen</th>
+                  <th>Holder</th>
                 </tr>
               </thead>
               <tbody id="tracking-table-body">
-                <tr><td colspan="7" class="text-center">Loading tracking data...</td></tr>
+                <tr><td colspan="7" class="text-center py-8 text-mist-900">Loading asset positions...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
         <!-- Tab 4: Security Alerts -->
-        <div class="tab-content" id="tab-alerts">
-          <div class="tab-actions">
-            <h3>Security Incidents & Anti-Theft Breaches</h3>
-            <button class="btn-sm btn-secondary" onclick="app.loadAlerts()">Refresh Alerts</button>
+        <div class="tab-panel" id="tab-alerts">
+          <div class="panel-toolbar">
+            <div>
+              <h3 class="panel-title">Perimeter Security Breaches</h3>
+              <p class="panel-subtitle">FR8 · Real-time exit gate theft breaches and unregistered tag detections</p>
+            </div>
+            <button class="btn-refresh" onclick="app.loadAlerts()" data-cursor="hover">Refresh Incidents</button>
           </div>
-          <div class="table-responsive">
-            <table class="data-table">
+
+          <div class="cyber-table-container">
+            <table class="cyber-table">
               <thead>
                 <tr>
                   <th>Severity</th>
-                  <th>Type</th>
-                  <th>Incident Message</th>
+                  <th>Incident Type</th>
+                  <th>Forensic Details</th>
                   <th>Terminal</th>
-                  <th>Timestamp</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th>Time</th>
+                  <th>State</th>
+                  <th>Acknowledge</th>
                 </tr>
               </thead>
               <tbody id="alerts-table-body">
-                <tr><td colspan="7" class="text-center">No alerts recorded.</td></tr>
+                <tr><td colspan="7" class="text-center py-8 text-mist-900">No active incidents recorded.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Tab 5: Reader Fleet & Cloud Metrics -->
-        <div class="tab-content" id="tab-fleet">
-          <div class="tab-actions">
-            <h3>Connected Edge Reader Fleet & 12-Factor Health</h3>
-            <a href="/metrics" target="_blank" class="link-external">View Prometheus /metrics ↗</a>
+        <!-- Tab 5: Reader Fleet & Cloud Topology -->
+        <div class="tab-panel" id="tab-fleet">
+          <div class="panel-toolbar">
+            <div>
+              <h3 class="panel-title">Connected Edge Reader Fleet</h3>
+              <p class="panel-subtitle">12-Factor stateless compute cluster with distributed heartbeats</p>
+            </div>
+            <a href="/metrics" target="_blank" class="link-prom" data-cursor="hover">Prometheus /metrics ↗</a>
           </div>
-          <div class="fleet-grid" id="fleet-cards-container">
-            <!-- Reader cards dynamically populated -->
+
+          <div class="fleet-cards-grid" id="fleet-cards-container">
+            <!-- Populated dynamically -->
           </div>
-          <div class="cloud-metrics-box">
-            <h4>System Architecture & Deployment Telemetry</h4>
-            <div class="telemetry-grid">
-              <div class="telemetry-item">
-                <span class="label">Architecture:</span>
-                <span class="val">Stateless FastAPI behind Nginx Load Balancer</span>
+
+          <div class="architecture-telemetry-box">
+            <h4 class="telemetry-box-title">DEPLOYED INFRASTRUCTURE TELEMETRY</h4>
+            <div class="telemetry-grid-details">
+              <div class="telemetry-cell">
+                <span class="cell-key">CLUSTER TOPOLOGY:</span>
+                <span class="cell-val">Stateless FastAPI Replicas behind Nginx LB</span>
               </div>
-              <div class="telemetry-item">
-                <span class="label">Elasticity:</span>
-                <span class="val">docker compose up --scale api=3</span>
+              <div class="telemetry-cell">
+                <span class="cell-key">ELASTIC SCALING:</span>
+                <span class="cell-val text-signal">docker compose up --scale api=3</span>
               </div>
-              <div class="telemetry-item">
-                <span class="label">Replay Window:</span>
-                <span class="val">60 seconds (Nonce + Timestamp tolerance)</span>
+              <div class="telemetry-cell">
+                <span class="cell-key">REPLAY WINDOW:</span>
+                <span class="cell-val">60s Sliding Clock Drift & Nonce Cache</span>
               </div>
-              <div class="telemetry-item">
-                <span class="label">Debounce Filter:</span>
-                <span class="val">2.0 seconds hardware read suppression</span>
+              <div class="telemetry-cell">
+                <span class="cell-key">CARRIER DEBOUNCE:</span>
+                <span class="cell-val text-signal">2.0s Hardware RF Burst Filter</span>
               </div>
             </div>
           </div>
@@ -333,7 +534,7 @@
   </main>
 
   <!-- Notification Toast Container -->
-  <div id="toast-container" class="toast-container"></div>
+  <div id="toast-container" class="toast-stack"></div>
 
   <script src="app.js"></script>
 </body>

@@ -1,4 +1,5 @@
-// RFID Cloud Library System - Frontend SPA & Virtual Edge Reader
+// StackWave RFID Cloud OS · Frontend Controller & Edge Simulator
+// Nexus Studio Dark Luxury Editorial Interactive Engine
 
 class RFIDApp {
   constructor() {
@@ -18,11 +19,12 @@ class RFIDApp {
   }
 
   init() {
+    this.setupCustomCursor();
     this.setupTabs();
     this.setupTopAlarmBanner();
     this.fetchAllData();
 
-    // Start background polling every 2.5 seconds
+    // Start background telemetry polling every 2.5 seconds
     this.pollInterval = setInterval(() => {
       this.loadStats();
       this.loadEvents();
@@ -30,7 +32,59 @@ class RFIDApp {
     }, 2500);
   }
 
-  // ---------------- Cryptographic HMAC Helper ----------------
+  // ---------------- Nexus Studio Interactive Magnetic Cursor ----------------
+  setupCustomCursor() {
+    const dot = document.getElementById("custom-cursor-dot");
+    const ring = document.getElementById("custom-cursor-ring");
+    if (!dot || !ring) return;
+
+    let mouseX = -100;
+    let mouseY = -100;
+    let dotX = -100;
+    let dotY = -100;
+    let ringX = -100;
+    let ringY = -100;
+
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    const renderCursor = () => {
+      // Spring lerp interpolation
+      dotX += (mouseX - dotX) * 0.45;
+      dotY += (mouseY - dotY) * 0.45;
+      ringX += (mouseX - ringX) * 0.16;
+      ringY += (mouseY - ringY) * 0.16;
+
+      dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) translate(-50%, -50%)`;
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+
+      requestAnimationFrame(renderCursor);
+    };
+    requestAnimationFrame(renderCursor);
+
+    // Dynamic hover targets with data-cursor="hover" or interactive elements
+    document.addEventListener("mouseover", (e) => {
+      const el = e.target.closest('[data-cursor="hover"], button, a, select, input, .bento-card');
+      if (el) {
+        dot.classList.add("cursor-hover");
+        ring.classList.add("cursor-hover");
+        dot.textContent = "CLICK";
+      }
+    });
+
+    document.addEventListener("mouseout", (e) => {
+      if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('[data-cursor="hover"], button, a, select, input, .bento-card')) {
+        return;
+      }
+      dot.classList.remove("cursor-hover");
+      ring.classList.remove("cursor-hover");
+      dot.textContent = "";
+    });
+  }
+
+  // ---------------- Cryptographic HMAC-SHA256 Helper ----------------
   async computeHMAC(device_id, tag_uid, timestamp, nonce, secret_key) {
     const message = `${device_id}:${tag_uid}:${timestamp}:${nonce}`;
     const enc = new TextEncoder();
@@ -50,8 +104,7 @@ class RFIDApp {
       const hexSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       return hexSignature;
     } catch (err) {
-      console.error("Crypto HMAC failed, falling back:", err);
-      // Fallback mock signature
+      console.error("WebCrypto HMAC computation error:", err);
       return "0000000000000000000000000000000000000000000000000000000000000000";
     }
   }
@@ -63,7 +116,7 @@ class RFIDApp {
     return Math.random().toString(36).substring(2, 18);
   }
 
-  // ---------------- Virtual RFID Scanner Emission ----------------
+  // ---------------- Virtual RFID Edge Terminal Scanner ----------------
   async simulateScan(tagUid, overrideReaderId = null, customNonce = null, customTimestamp = null, customSignature = null) {
     const readerSelect = document.getElementById("reader-select");
     if (overrideReaderId) {
@@ -107,12 +160,12 @@ class RFIDApp {
         JSON.stringify(data, null, 2);
 
       if (resp.status === 200) {
-        indicator.textContent = "HMAC Verified";
-        indicator.className = "sig-status valid";
+        indicator.textContent = "HMAC VERIFIED";
+        indicator.className = "crypto-badge badge-valid";
         this.handleScanResult(data);
       } else {
-        indicator.textContent = "Rejected / 401";
-        indicator.className = "sig-status invalid";
+        indicator.textContent = "REJECTED / 401";
+        indicator.className = "crypto-badge badge-invalid";
         this.showToast(`Scan Rejected: ${data.detail || "Authentication Failed"}`, "danger");
       }
 
@@ -144,13 +197,13 @@ class RFIDApp {
     msgSpan.textContent = message;
     banner.classList.remove("hidden");
 
-    // Audio beep (Web Audio API synthetic chime)
+    // Synthetic audio alert chime via Web Audio API
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 alarm pitch
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
       osc.frequency.setValueAtTime(440, ctx.currentTime + 0.15);
       osc.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
       gain.gain.setValueAtTime(0.15, ctx.currentTime);
@@ -160,15 +213,15 @@ class RFIDApp {
       osc.start();
       osc.stop(ctx.currentTime + 0.5);
     } catch (e) {
-      // Audio autoplay policy might prevent sound; visual alarm is always active
+      // Audio autoplay policy fallback
     }
   }
 
-  // ---------------- Special Test Buttons ----------------
+  // ---------------- Special Verification Scenarios ----------------
   async triggerDebounceTest() {
     const tag = "TAG-BK-CLEAN-01";
     const readerId = "CHECKOUT-01";
-    this.showToast("⚡ Triggering Rapid Hardware Burst (2 reads in 30ms)...", "info");
+    this.showToast("⚡ Rapid RF Burst Triggered (2 reads in 30ms)...", "info");
 
     // First scan
     this.simulateScan(tag, readerId);
@@ -187,11 +240,11 @@ class RFIDApp {
     const nonce = "replay-nonce-" + Math.floor(Math.random() * 10000);
     const sig = await this.computeHMAC(readerId, tag, timestamp, nonce, secretKey);
 
-    this.showToast("🛡️ Step 1: Sending legitimate signed scan...", "info");
+    this.showToast("🛡️ Phase 1: Emitting legitimate signed scan...", "info");
     await this.simulateScan(tag, readerId, nonce, timestamp, sig);
 
     setTimeout(async () => {
-      this.showToast("🛡️ Step 2: Injected malicious re-transmission with same nonce...", "warning");
+      this.showToast("🛡️ Phase 2: Injecting fraudulent replay packet with duplicated nonce...", "warning");
       await this.simulateScan(tag, readerId, nonce, timestamp, sig);
     }, 1200);
   }
@@ -200,14 +253,14 @@ class RFIDApp {
     const input = document.getElementById("custom-tag-input");
     const val = input.value.trim();
     if (!val) {
-      this.showToast("Please enter a valid RFID Tag or Card UID", "warning");
+      this.showToast("Please enter an RFID Tag or Card UID", "warning");
       return;
     }
     this.simulateScan(val);
     input.value = "";
   }
 
-  // ---------------- Data Loaders ----------------
+  // ---------------- Data Telemetry Fetchers ----------------
   async fetchAllData() {
     await Promise.all([
       this.loadStats(),
@@ -233,10 +286,20 @@ class RFIDApp {
       document.getElementById("kpi-active-alerts").textContent = data.unresolved_alerts;
 
       const alertsCard = document.getElementById("kpi-alerts-card");
+      const alertsTag = document.getElementById("kpi-alerts-tag");
       if (data.unresolved_alerts > 0) {
         alertsCard.classList.add("highlight-red");
+        if (alertsTag) {
+          alertsTag.textContent = "BREACH";
+          alertsTag.className = "card-tag tag-ember";
+        }
         document.getElementById("kpi-alerts-sub").textContent = "ATTENTION REQUIRED";
       } else {
+        alertsCard.classList.remove("highlight-red");
+        if (alertsTag) {
+          alertsTag.textContent = "CLEAN";
+          alertsTag.className = "card-tag";
+        }
         document.getElementById("kpi-alerts-sub").textContent = "All gates clear";
       }
 
@@ -264,7 +327,7 @@ class RFIDApp {
     const filtered = filter ? this.cachedEvents.filter(e => e.reader_id === filter) : this.cachedEvents;
 
     if (!filtered || filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center">No scan events recorded yet. Tap a button above!</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-mist-900 font-mono text-xs">No scan events recorded yet. Trigger a scenario on the left!</td></tr>`;
       return;
     }
 
@@ -283,13 +346,13 @@ class RFIDApp {
 
       return `
         <tr>
-          <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim);">${timeStr}</td>
-          <td><span class="mono-tag">${e.reader_id}</span></td>
-          <td><span class="mono-tag" style="color: #6ee7b7;">${e.tag_uid}</span></td>
+          <td class="font-mono text-xs text-mist-900">${timeStr}</td>
+          <td><span class="mono-tag text-signal">${e.reader_id}</span></td>
+          <td><span class="mono-tag font-bold">${e.tag_uid}</span></td>
           <td><span class="badge ${e.tag_type === 'MEMBER_CARD' ? 'badge-purple' : 'badge-info'}">${e.tag_type}</span></td>
           <td>
             <span class="badge ${badgeClass}">${e.result_status}</span>
-            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">${e.action_detail || ''}</div>
+            <div style="font-size: 0.72rem; color: var(--mist-900); margin-top: 2px;">${e.action_detail || ''}</div>
           </td>
           <td>
             <span class="badge ${e.signature_valid ? 'badge-success' : 'badge-danger'}">
@@ -311,7 +374,7 @@ class RFIDApp {
       const tbody = document.getElementById("loans-table-body");
 
       if (!loans || loans.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center">No active loans in database.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-mist-900 font-mono text-xs">No active loans in database.</td></tr>`;
         return;
       }
 
@@ -327,18 +390,18 @@ class RFIDApp {
 
         return `
           <tr>
-            <td>#${l.id}</td>
+            <td class="font-mono text-xs text-mist-900">#${l.id}</td>
             <td><strong>${l.book_title || 'N/A'}</strong></td>
-            <td><span class="mono-tag">${l.tag_uid || 'N/A'}</span></td>
+            <td><span class="mono-tag text-signal">${l.tag_uid || 'N/A'}</span></td>
             <td>${l.member_name || 'N/A'}</td>
-            <td>${new Date(l.checkout_at).toLocaleDateString()}</td>
-            <td style="${isOverdue ? 'color: #f87171; font-weight: 700;' : ''}">${dueDate.toLocaleDateString()}</td>
+            <td class="font-mono text-xs text-mist-900">${new Date(l.checkout_at).toLocaleDateString()}</td>
+            <td class="font-mono text-xs" style="${isOverdue ? 'color: #f87171; font-weight: 700;' : 'color: var(--mist-700);'}">${dueDate.toLocaleDateString()}</td>
             <td>${statusBadge}</td>
-            <td>${l.renewal_count}/1</td>
+            <td class="font-mono text-xs">${l.renewal_count}/1</td>
             <td>
               ${canRenew
-                ? `<button class="btn-sm btn-renew" onclick="app.renewLoan(${l.id})">Renew (+14d)</button>`
-                : `<span style="font-size: 0.7rem; color: var(--text-dim);">${l.renewal_count >= 1 ? 'Limit Met' : (isOverdue ? 'Blocked: Overdue' : 'Completed')}</span>`
+                ? `<button class="btn-sm btn-renew" onclick="app.renewLoan(${l.id})" data-cursor="hover">Renew (+14d)</button>`
+                : `<span class="font-mono text-xs text-mist-900">${l.renewal_count >= 1 ? 'Limit Met' : (isOverdue ? 'Blocked: Overdue' : 'Completed')}</span>`
               }
             </td>
           </tr>
@@ -373,7 +436,7 @@ class RFIDApp {
 
       const tbody = document.getElementById("tracking-table-body");
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center">No catalog copies tracked.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-mist-900 font-mono text-xs">No catalog copies tracked.</td></tr>`;
         return;
       }
 
@@ -387,12 +450,12 @@ class RFIDApp {
         return `
           <tr>
             <td><strong>${c.book_title}</strong></td>
-            <td><span class="mono-tag" style="color: #6ee7b7;">${c.tag_uid}</span></td>
+            <td><span class="mono-tag text-signal">${c.tag_uid}</span></td>
             <td><span class="badge ${statusBadge}">${c.status}</span></td>
-            <td>📍 ${c.shelf_location}</td>
+            <td><span class="font-mono text-xs">📍 ${c.shelf_location}</span></td>
             <td><span class="mono-tag">${c.last_seen_reader_id || 'N/A'}</span></td>
-            <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim);">${lastSeen}</td>
-            <td>${c.current_borrower || '<span style="color: var(--text-dim);">On Shelf</span>'}</td>
+            <td class="font-mono text-xs text-mist-900">${lastSeen}</td>
+            <td>${c.current_borrower || '<span class="text-mist-900 font-mono text-xs">On Shelf</span>'}</td>
           </tr>
         `;
       }).join('');
@@ -421,7 +484,7 @@ class RFIDApp {
 
       const tbody = document.getElementById("alerts-table-body");
       if (!alerts || alerts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center">Zero security incidents recorded.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-mist-900 font-mono text-xs">Zero security incidents recorded.</td></tr>`;
         return;
       }
 
@@ -435,8 +498,8 @@ class RFIDApp {
             <td>${severityBadge}</td>
             <td><strong>${a.alert_type}</strong></td>
             <td style="color: #fca5a5;">${a.message}</td>
-            <td><span class="mono-tag">${a.reader_id || 'N/A'}</span></td>
-            <td style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim);">${new Date(a.created_at).toLocaleTimeString()}</td>
+            <td><span class="mono-tag text-signal">${a.reader_id || 'N/A'}</span></td>
+            <td class="font-mono text-xs text-mist-900">${new Date(a.created_at).toLocaleTimeString()}</td>
             <td>
               <span class="badge ${a.resolved ? 'badge-success' : 'badge-danger'}">
                 ${a.resolved ? 'RESOLVED' : 'ACTIVE'}
@@ -444,8 +507,8 @@ class RFIDApp {
             </td>
             <td>
               ${!a.resolved
-                ? `<button class="btn-sm btn-action-resolve" onclick="app.resolveAlert(${a.id})">Acknowledge</button>`
-                : `<span style="font-size: 0.7rem; color: var(--text-dim);">By ${a.resolved_by || 'Staff'}</span>`
+                ? `<button class="btn-sm btn-action-resolve" onclick="app.resolveAlert(${a.id})" data-cursor="hover">Acknowledge</button>`
+                : `<span class="font-mono text-xs text-mist-900">By ${a.resolved_by || 'Staff'}</span>`
               }
             </td>
           </tr>
@@ -478,7 +541,7 @@ class RFIDApp {
     if (!container || !fleet) return;
 
     container.innerHTML = fleet.map(r => `
-      <div class="fleet-card">
+      <div class="fleet-card" data-cursor="hover">
         <div class="fleet-card-header">
           <span class="fleet-device-id">${r.device_id}</span>
           <span class="badge ${r.is_online ? 'badge-success' : 'badge-warning'}">
@@ -488,9 +551,9 @@ class RFIDApp {
         <div class="fleet-card-name">${r.name}</div>
         <div class="fleet-meta">
           <span>Role: <strong>${r.type}</strong></span>
-          <span>Location: ${r.location}</span>
+          <span>Location: <strong>${r.location}</strong></span>
           <span>Total Ingested Reads: <strong>${r.total_scans}</strong></span>
-          <span>Security: <strong>HMAC-SHA256</strong></span>
+          <span>Security: <strong class="text-signal">HMAC-SHA256</strong></span>
         </div>
       </div>
     `).join('');
@@ -498,11 +561,11 @@ class RFIDApp {
 
   // ---------------- UI Helpers ----------------
   setupTabs() {
-    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabButtons = document.querySelectorAll(".tab-link");
     tabButtons.forEach(btn => {
       btn.addEventListener("click", () => {
         tabButtons.forEach(b => b.classList.remove("active"));
-        document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach(tc => tc.classList.remove("active"));
 
         btn.classList.add("active");
         const target = btn.getAttribute("data-tab");
@@ -514,6 +577,7 @@ class RFIDApp {
 
   setupTopAlarmBanner() {
     const btn = document.getElementById("btn-resolve-top-alarm");
+    if (!btn) return;
     btn.addEventListener("click", async () => {
       const resp = await fetch(`${this.apiBase}/alerts?unresolved_only=true`);
       if (resp.ok) {
@@ -547,7 +611,7 @@ class RFIDApp {
   }
 }
 
-// Instantiate on load
+// Instantiate on DOM ready
 let app;
 window.addEventListener("DOMContentLoaded", () => {
   app = new RFIDApp();

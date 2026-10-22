@@ -88,8 +88,17 @@ app.include_router(monitoring.router)
 # Serve Frontend static directory if present
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend")
 if os.path.exists(frontend_dir):
-    app.mount("/dashboard", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+    @app.get("/style.css", include_in_schema=False)
+    def get_style():
+        return FileResponse(os.path.join(frontend_dir, "style.css"), media_type="text/css")
+
+    @app.get("/app.js", include_in_schema=False)
+    def get_script():
+        return FileResponse(os.path.join(frontend_dir, "app.js"), media_type="application/javascript")
 
     @app.get("/", include_in_schema=False)
     def root_redirect():
         return FileResponse(os.path.join(frontend_dir, "index.html"))
+
+    app.mount("/dashboard", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+
