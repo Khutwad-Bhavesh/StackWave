@@ -1,6 +1,6 @@
-# Cloud-Native RFID Library System
+# StackWave: Cloud-Native RFID Library System
 
-A containerized, 12-factor cloud-native automated library circulation, tracking, and anti-theft security system. Integrates physical RFID simulation (HF 13.56MHz), cryptographic HMAC edge ingestion, real-time patron self-checkout/return workflows, and a live web dashboard.
+**StackWave** is a containerized, 12-factor cloud-native automated library circulation, tracking, and anti-theft security system. Integrates physical RFID simulation (HF 13.56MHz), cryptographic HMAC edge ingestion, real-time patron self-checkout/return workflows, and a live web dashboard.
 
 ---
 

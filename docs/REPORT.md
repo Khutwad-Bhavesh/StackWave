@@ -1,7 +1,7 @@
-# Engineering Report: Cloud-Native RFID Library System
+# Engineering Report: StackWave (Cloud-Native RFID Library System)
 
 **Course / Project**: Cloud Computing & Distributed Systems Laboratory  
-**Project Title**: Container-Native RFID Library Circulation, Inventory Tracking & Anti-Theft Management System  
+**Project Title**: StackWave — Container-Native RFID Library Circulation, Inventory Tracking & Anti-Theft Management System  
 **System Version**: 1.0.0  
 **Implementation Architecture**: 12-Factor Stateless Microservices behind Nginx Load Balancer with PostgreSQL Persistence and Cryptographic HMAC Edge Ingestion  
 
