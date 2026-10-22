@@ -96,6 +96,10 @@ if os.path.exists(frontend_dir):
     def get_script():
         return FileResponse(os.path.join(frontend_dir, "app.js"), media_type="application/javascript")
 
+    @app.get("/background.jpg", include_in_schema=False)
+    def get_background():
+        return FileResponse(os.path.join(frontend_dir, "background.jpg"), media_type="image/jpeg")
+
     @app.get("/", include_in_schema=False)
     def root_redirect():
         return FileResponse(os.path.join(frontend_dir, "index.html"))

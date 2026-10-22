@@ -50,8 +50,26 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Main Website Background Image with Manga Bookshelf Vignette */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: 
+    radial-gradient(circle at 50% 18%, rgba(4, 4, 10, 0.42) 0%, rgba(4, 4, 10, 0.75) 55%, rgba(4, 4, 10, 0.94) 100%),
+    linear-gradient(180deg, rgba(4, 4, 10, 0.5) 0%, rgba(4, 4, 10, 0.72) 45%, rgba(4, 4, 10, 0.92) 100%),
+    url('background.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  pointer-events: none;
 }
 
 ::selection {
@@ -233,8 +251,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(4, 4, 10, 0.82);
-  backdrop-filter: blur(20px);
+  background: rgba(4, 4, 10, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--border-hairline);
   position: relative;
 }
@@ -397,13 +416,17 @@ body {
    Nexus Studio Animated Marquee Ticker
    ========================================================================== */
 .marquee-strip {
-  background: var(--ink-900);
+  background: rgba(8, 8, 18, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255, 255, 255, 0.04);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   overflow: hidden;
   padding: 0.65rem 0;
   white-space: nowrap;
   user-select: none;
+  position: relative;
+  z-index: 2;
 }
 
 .marquee-track {
@@ -492,8 +515,10 @@ body {
 }
 
 .bento-card {
-  background: var(--ink-800);
-  border: 1px solid var(--border-hairline);
+  background: rgba(13, 13, 31, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 1.35rem;
   border-radius: 4px;
   position: relative;
@@ -508,7 +533,7 @@ body {
 .bento-card:hover {
   border-color: var(--border-focus);
   transform: translateY(-2px);
-  background: #111129;
+  background: rgba(17, 17, 41, 0.88);
 }
 
 .bento-card.highlight-red {
@@ -608,7 +633,9 @@ body {
 
 /* Left: High-Tech Virtual Terminal Console */
 .console-panel {
-  background: var(--ink-900);
+  background: rgba(8, 8, 18, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-hairline);
   border-radius: 4px;
   overflow: hidden;
@@ -618,7 +645,9 @@ body {
 
 .console-header {
   padding: 1.15rem 1.25rem;
-  background: var(--ink-800);
+  background: rgba(13, 13, 31, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-hairline);
   display: flex;
   justify-content: space-between;
@@ -904,7 +933,9 @@ body {
    Right: Operations Panel & Cyber Tables
    ========================================================================== */
 .operations-panel {
-  background: var(--ink-900);
+  background: rgba(8, 8, 18, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-hairline);
   border-radius: 4px;
   overflow: hidden;
@@ -912,7 +943,9 @@ body {
 
 .nav-tabs-bar {
   display: flex;
-  background: var(--ink-800);
+  background: rgba(13, 13, 31, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-hairline);
   overflow-x: auto;
 }
