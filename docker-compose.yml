@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 1. Managed Database Analog: PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: rfid_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rfid_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rfid_secure_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-rfid_library}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rfid_admin} -d ${POSTGRES_DB:-rfid_library}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Containerized Stateless FastAPI Backend
+  # Elastic: scale horizontally with 'docker compose up --scale api=3'
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-rfid_admin}:${POSTGRES_PASSWORD:-rfid_secure_pass}@postgres:5432/${POSTGRES_DB:-rfid_library}
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-rfid-cloud-secret-token-key-2026-production-grade}
+      - HMAC_REPLAY_WINDOW_SECONDS=${HMAC_REPLAY_WINDOW_SECONDS:-60}
+      - RFID_DEBOUNCE_WINDOW_SECONDS=${RFID_DEBOUNCE_WINDOW_SECONDS:-2.0}
+      - DEFAULT_LOAN_DAYS=14
+      - MAX_BOOKS_PER_MEMBER=5
+      - FINE_PER_DAY=1.00
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8000"
+
+  # 3. Nginx Load Balancer, Ingress & Static SPA Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: rfid_nginx_lb
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
